@@ -2,9 +2,9 @@
   <div id="app">
     <div class="caculator">
       <div class="result" style="grid-area:result">{{equation}}</div>
-      <button style="grid-area:ac">AC</button>
-      <button style="grid-area:plus-minus">±</button>
-      <button style="grid-area:percent">%</button>
+      <button style="grid-area:ac" @click="clear()">AC</button>
+      <button style="grid-area:plus-minus" @click="togglecal()">±</button>
+      <button style="grid-area:percent" @click="percentcal()">%</button>
       <button style="grid-area:divide" @click="append('÷')">÷</button>
       <button style="grid-area:number-7" @click="append(7)">7</button>
       <button style="grid-area:number-8" @click="append(8)">8</button>
@@ -13,14 +13,14 @@
       <button style="grid-area:number-4" @click="append(4)">4</button>
       <button style="grid-area:number-5" @click="append(5)">5</button>
       <button style="grid-area:number-6" @click="append(6)">6</button>
-      <button style="grid-area:minus" @click="append('－')">－</button>
+      <button style="grid-area:minus" @click="append('-')">－</button>
       <button style="grid-area:number-1" @click="append(1)">1</button>
       <button style="grid-area:number-2" @click="append(2)">2</button>
       <button style="grid-area:number-3" @click="append(3)">3</button>
-      <button style="grid-area:plus" @click="append('＋')">＋</button>
+      <button style="grid-area:plus" @click="append('+')">＋</button>
       <button style="grid-area:number-0" @click="append(0)">0</button>
       <button style="grid-area:dot" @click="append('.')">.</button>
-      <button style="grid-area:equal">=</button>
+      <button style="grid-area:equal" @click="caculate()">=</button>
     </div>
   </div>
 </template>
@@ -47,6 +47,7 @@ export default {
         if (num === '.') {
           this.equation += num
           this.isdot = true
+          this.isOperator = true
         } else {
           this.equation = num
         }
@@ -54,9 +55,52 @@ export default {
         return
       }
       // number
-      if () {
+      if (!this.isOperatorStatus(num)) {
+        if (this.isdot && num === '.') {
+          return
+        } else if (num === '.') {
+          this.isdot = true
+          this.isOperator = true
+        } else {
+          this.isOperator = false
+        }
+        this.equation += '' + num
+      }
+      // operater
+      if (this.isOperatorStatus(num) && !this.isOperator) {
+        this.equation += num
+        this.isdot = false
+        this.isOperator = true
+      } else if (this.isOperatorStatus(num) && this.isOperator) {
 
       }
+    },
+    // =
+    caculate () {
+
+    },
+    // ac
+    clear () {
+      this.equation = '0'
+      this.isOperator = false
+      this.isdot = false
+      this.isStarted = false
+    },
+    // +_
+    togglecal () {
+      if (this.isOperator || !this.isStarted) {
+        return
+      }
+      this.equation = this.togglecal + '*-1'
+      this.calculate()
+    },
+    // %
+    percentcal () {
+      if (this.isOperator || !this.isStarted) {
+        return
+      }
+      this.equation = this.equation + '* 0.01'
+      this.caculate()
     }
   }
 }
