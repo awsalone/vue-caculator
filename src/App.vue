@@ -8,7 +8,7 @@
       <button style="grid-area:divide" @click="append('÷')">÷</button>
       <button style="grid-area:number-7" @click="append(7)">7</button>
       <button style="grid-area:number-8" @click="append(8)">8</button>
-      <button style="grid-area:number-9" @click="append(8)">9</button>
+      <button style="grid-area:number-9" @click="append(9)">9</button>
       <button style="grid-area:multiply" @click="append('×')">×</button>
       <button style="grid-area:number-4" @click="append(4)">4</button>
       <button style="grid-area:number-5" @click="append(5)">5</button>
@@ -33,7 +33,8 @@ export default {
       equation: '0', // result显示
       isStarted: false, // 开始
       isdot: false, // 小数点存在
-      isOperator: false // 计算符号
+      isOperator: false, // 计算符号
+      iscaculated: false // 计算完成状态
     }
   },
   methods: {
@@ -42,13 +43,17 @@ export default {
       return ['+', '-', '×', '÷'].indexOf(num) !== -1
     },
     append (num) {
+      console.log(typeof (num))
       // start
       if (this.equation === '0' && !this.isOperatorStatus(num)) {
         if (num === '.') {
           this.equation += num
           this.isdot = true
           this.isOperator = true
-        } else {
+        } else if (num == '0') {
+          return
+        }
+        else {
           this.equation = num
         }
         this.isStarted = true
@@ -56,28 +61,51 @@ export default {
       }
       // number
       if (!this.isOperatorStatus(num)) {
-        if (this.isdot && num === '.') {
+        if ((this.isdot && num === '.') || (this.isOperator && num === '.')) {
           return
         } else if (num === '.') {
           this.isdot = true
           this.isOperator = true
+          this.iscaculated = false
         } else {
           this.isOperator = false
+        }
+        if (this.iscaculated) {
+          this.equation = num
+          this.iscaculated = false
+          return
         }
         this.equation += '' + num
       }
       // operater
-      if (this.isOperatorStatus(num) && !this.isOperator) {
-        this.equation += num
-        this.isdot = false
-        this.isOperator = true
-      } else if (this.isOperatorStatus(num) && this.isOperator) {
+      if (this.isOperatorStatus(num)) {
+        if (!this.isOperator) {
+          this.equation += num
+          this.isdot = false
+          this.isOperator = true
+          this.iscaculated = false
+        } else {
+          let result = this.equation
+          this.equation = result.replace(result.charAt(result.length - 1), num)
+
+        }
 
       }
     },
     // =
     caculate () {
-
+      if (this.isOperator || this.isdot) {
+        this.equation = this.equation.substring(0, this.equation.length - 1)
+        this.isdot = false
+        this.isOperator = false
+        this.isStarted = true
+        this.iscaculated = true
+      }
+      let result = this.equation.replace(new RegExp('×', 'g'), '*').replace(new RegExp('÷'), '/')
+      this.equation = parseFloat(eval(result).toFixed(8)).toString()
+      this.isdot = false
+      this.isStarted = true
+      this.iscaculated = true
     },
     // ac
     clear () {
@@ -85,14 +113,15 @@ export default {
       this.isOperator = false
       this.isdot = false
       this.isStarted = false
+
     },
     // +_
     togglecal () {
       if (this.isOperator || !this.isStarted) {
         return
       }
-      this.equation = this.togglecal + '*-1'
-      this.calculate()
+      this.equation = this.equation + '*-1'
+      this.caculate()
     },
     // %
     percentcal () {
@@ -129,6 +158,8 @@ body {
         'number-1 number-2 number-3 plus'
         'number-0 number-0 dot equal';
       padding: 12px;
+
+      border-radius: 5px;
       button {
         outline: none;
         margin: 8px;
@@ -158,6 +189,8 @@ body {
         padding: 0 20px;
         color: #666;
         font-size: 42px;
+        overflow-x: auto;
+        overflow-y: hidden;
       }
     }
   }
