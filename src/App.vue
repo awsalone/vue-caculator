@@ -43,7 +43,6 @@ export default {
       return ['+', '-', '×', '÷'].indexOf(num) !== -1
     },
     append (num) {
-      console.log(typeof (num))
       // start
       if (this.equation === '0' && !this.isOperatorStatus(num)) {
         if (num === '.') {
